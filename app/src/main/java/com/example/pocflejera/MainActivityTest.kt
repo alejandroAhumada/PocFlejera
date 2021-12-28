@@ -1,21 +1,18 @@
 package com.example.pocflejera
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.Intent
 import android.databinding.DataBindingUtil
-import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.AppCompatButton
-import android.util.Log
 import android.view.View
 import android.widget.Toast
-import com.cencosud.smartscan.model.product.ProductServer
 import com.example.pocflejera.databinding.ActivityMainBinding
 import com.example.pocflejera.util.Zpl
 import com.zebra.sdk.comm.BluetoothConnection
@@ -71,6 +68,7 @@ class MainActivityTest : AppCompatActivity() {
         binding.lblBag.setOnClickListener(onClickLbl())
     }
 
+    @SuppressLint("NewApi")
     private fun onClickLbl(): View.OnClickListener {
         return View.OnClickListener {
             when ((it as AppCompatButton).text) {
@@ -88,8 +86,8 @@ class MainActivityTest : AppCompatActivity() {
                 }
                 "Logo Bolsa" -> {
                     lblSelected = Zpl.getLogoBolsa()
-                    binding.etHigth.setText("133")
-                    binding.etWidth.setText("9")
+                    binding.etHigth.setText("168")
+                    binding.etWidth.setText("40")
                     binding.etLblSelected.setBackgroundColor(this.getColor(R.color.white))
                 }
             }
@@ -210,6 +208,7 @@ class MainActivityTest : AppCompatActivity() {
         return encodedBytes
     }
 
+    @SuppressLint("NewApi")
     private fun sendFile() {
         var connection: Connection? = null
         if (mmDevice.address.isNotEmpty()) {
