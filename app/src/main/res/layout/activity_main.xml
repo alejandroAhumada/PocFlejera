@@ -13,7 +13,7 @@
             android:text="Type here:" />
 
         <EditText
-            android:id="@+id/etEan"
+            android:id="@+id/etQuantity"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/label"
@@ -55,29 +55,84 @@
             android:layout_marginTop="199dp" />
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="363dp"
-            android:layout_below="@id/etEan"
-            android:layout_marginTop="218dp">
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="250dp"
+            android:layout_marginEnd="17dp"
+            android:layout_marginBottom="245dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/lblProduct"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Logo Producto" />
+
+            <Button
+                android:id="@+id/lblChristmas"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Logo Navidad" />
+
+            <Button
+                android:id="@+id/lblBag"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Logo Bolsa" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/etLblSelected"
+            android:layout_width="fill_parent"
+            android:layout_height="30dp"
+            android:layout_below="@id/label"
+            android:layout_marginTop="310dp"
+            android:hint="Seleccionar Logo a Imprimir"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:text="" />
+
+        <Button
+            android:id="@+id/send"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="370dp"
+            android:text="Imprimir" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="47dp"
+            android:layout_marginBottom="128dp"
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/open"
+                android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dip"
-                android:text="Open" />
-
-            <Button
-                android:id="@+id/send"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Send" />
+                android:text="Conectar BT" />
 
             <Button
                 android:id="@+id/close"
+                android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Close" />
+                android:text="Cerrar conexión" />
         </LinearLayout>
     </RelativeLayout>
 </layout>
