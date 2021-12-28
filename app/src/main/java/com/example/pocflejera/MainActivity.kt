@@ -43,7 +43,7 @@ class MainActivity : Activity() {
     var labelCount: TextView? = null
 
     // will enable user to enter any text to be printed
-    var etEAN: EditText? = null
+    var etQuantity: EditText? = null
     var etWidth: EditText? = null
     var etHigth: EditText? = null
 
@@ -110,7 +110,7 @@ class MainActivity : Activity() {
             myLabel = findViewById<View>(R.id.label) as TextView
             labelTotal = findViewById<View>(R.id.labelTotal) as TextView
             labelCount = findViewById<View>(R.id.labelCount) as TextView
-            etEAN = findViewById<View>(R.id.etEan) as EditText
+            etQuantity = findViewById<View>(R.id.etQuantity) as EditText
             etHigth = findViewById<View>(R.id.etHigth) as EditText
             etWidth = findViewById<View>(R.id.etWidth) as EditText
 
@@ -123,11 +123,11 @@ class MainActivity : Activity() {
 
     private fun onclickSendButton() {
         var j = 0
-        while (j < etEAN!!.text.toString().toInt()){
+        while (j < etQuantity!!.text.toString().toInt()){
             j++
 
             runOnUiThread {
-                labelTotal!!.setText("${etEAN!!.text} / ")
+                labelTotal!!.setText("${etQuantity!!.text} / ")
                 labelCount!!.setText(j.toString())
             }
             Log.i("NumberPrinterPre", "NumberPrinter: ${j}")
