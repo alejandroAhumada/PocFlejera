@@ -12,7 +12,6 @@ import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.AppCompatButton
 import android.view.View
-import android.widget.Toast
 import com.example.pocflejera.databinding.ActivityMainBinding
 import com.example.pocflejera.util.Zpl
 import com.zebra.sdk.comm.BluetoothConnection
@@ -21,20 +20,25 @@ import com.zebra.sdk.comm.ConnectionException
 import com.zebra.sdk.printer.ZebraPrinter
 import com.zebra.sdk.printer.ZebraPrinterFactory
 import com.zebra.sdk.printer.ZebraPrinterLanguageUnknownException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.charset.StandardCharsets
 import java.util.*
+import kotlin.coroutines.CoroutineContext
 
-class MainActivityTest : AppCompatActivity() {
+class MainActivityTest : AppCompatActivity(), CoroutineScope {
 
     private lateinit var binding: ActivityMainBinding
 
     // android built in classes for bluetooth operations
-    lateinit var mBluetoothAdapter: BluetoothAdapter
-    lateinit var mmDevice: BluetoothDevice
-    lateinit var mmSocket: BluetoothSocket
+    private lateinit var mBluetoothAdapter: BluetoothAdapter
+    private lateinit var mmDevice: BluetoothDevice
+    private lateinit var mmSocket: BluetoothSocket
 
     // needed for communication to bluetooth device / network
     private lateinit var mmOutputStream: OutputStream
@@ -44,11 +48,11 @@ class MainActivityTest : AppCompatActivity() {
     @Volatile
     var stopWorker = false
 
-    var readBufferPosition = 0
-    var printer: ZebraPrinter? = null
-    lateinit var readBuffer: ByteArray
+    private var readBufferPosition = 0
+    private var printer: ZebraPrinter? = null
+    private lateinit var readBuffer: ByteArray
 
-    var lblSelected: String = ""
+    private var lblSelected: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -190,7 +194,7 @@ class MainActivityTest : AppCompatActivity() {
                     val data = String(getEncodedBytes(), StandardCharsets.UTF_8)
                     readBufferPosition = 0
 
-                    handler.post(Runnable { binding.label.text = data })
+                    handler.post { binding.label.text = data }
                 } else {
                     readBuffer[readBufferPosition++] = byte
                 }
@@ -214,46 +218,53 @@ class MainActivityTest : AppCompatActivity() {
         if (mmDevice.address.isNotEmpty()) {
             connection = BluetoothConnection(mmDevice.address)
         }
-        try {
-            if (lblSelected != ""){
-                if (!binding.etQuantity.text.isNullOrEmpty() && binding.etQuantity.text.toString().toInt() > 0) {
-                    Toast.makeText(this, "Sending file to printer ...", Toast.LENGTH_SHORT).show()
-                    if (!connection!!.isConnected) {
-                        connection.open()
+        launch {
+            try {
+                if (lblSelected != "") {
+                    if (!binding.etQuantity.text.isNullOrEmpty() && binding.etQuantity.text.toString().toInt() > 0) {
+                        sendOneToOne(connection)
+                    } else {
+                        binding.etQuantity.setHintTextColor(this@MainActivityTest.getColor(R.color.colorRed))
                     }
-
-                    printer = ZebraPrinterFactory.getInstance(connection)
-                    while (printer!!.currentStatus.isReadyToPrint) {
-                        var j = 0
-                        if (!connection.isConnected) {
-                            connection.open()
-                        }
-                        while (j < binding.etQuantity.text.toString().toInt()) {
-                            j++
-
-                            binding.labelTotal.text = "${binding.etQuantity.text} / "
-                            binding.labelCount.text = j.toString()
-                            testSendFile(printer!!)
-                        }
-                        break
-                    }
-                }else{
-                    binding.etQuantity.setHintTextColor(this.getColor(R.color.colorRed))
+                    connection!!.close()
+                } else {
+                    binding.etLblSelected.setBackgroundColor(this@MainActivityTest.getColor(R.color.colorRed))
+                    binding.etLblSelected.setTextColor(this@MainActivityTest.getColor(R.color.black))
                 }
-                connection!!.close()
-            }else{
-                binding.etLblSelected.setBackgroundColor(this.getColor(R.color.colorRed))
-                binding.etLblSelected.setTextColor(this.getColor(R.color.black))
-            }
 
-        } catch (e: ConnectionException) {
-            showErrorDialogOnGuiThread(e.message)
-        } catch (e: ZebraPrinterLanguageUnknownException) {
-            showErrorDialogOnGuiThread(e.message)
+            } catch (e: ConnectionException) {
+                showErrorDialogOnGuiThread(e.message)
+                sendFile()
+            } catch (e: ZebraPrinterLanguageUnknownException) {
+                showErrorDialogOnGuiThread(e.message)
+            }
+        }
+
+    }
+
+    private fun sendOneToOne(connection: Connection?) {
+        if (!connection!!.isConnected) {
+            connection.open()
+        }
+
+        printer = ZebraPrinterFactory.getInstance(connection)
+        while (printer!!.currentStatus.isReadyToPrint) {
+            var index = 0
+            if (!connection.isConnected) {
+                connection.open()
+            }
+            while (index < binding.etQuantity.text.toString().toInt()) {
+                index++
+                runOnUiThread {
+                    binding.labelTotal.text = "${binding.etQuantity.text} / "
+                }
+                testSendFile(printer!!, index)
+            }
+            break
         }
     }
 
-    private fun testSendFile(printer: ZebraPrinter) {
+    private fun testSendFile(printer: ZebraPrinter, index: Int) {
         try {
             val nameFile = "fleje.LBL"
             val filepath = getFileStreamPath(nameFile)
@@ -265,6 +276,9 @@ class MainActivityTest : AppCompatActivity() {
                 binding.etWidth.text.toString()
             )
             printer.sendFileContents(filepath.absolutePath)
+            runOnUiThread {
+                binding.labelCount.text = index.toString()
+            }
         } catch (e1: ConnectionException) {
             showErrorDialogOnGuiThread("Error sending file to printer")
         } catch (e: IOException) {
@@ -274,14 +288,14 @@ class MainActivityTest : AppCompatActivity() {
 
 
     private fun showErrorDialogOnGuiThread(errorMessage: String?) {
-        runOnUiThread(Runnable {
+        runOnUiThread {
             AlertDialog.Builder(this).setMessage(errorMessage).setTitle("Error")
                 .setPositiveButton(
                     "OK"
                 ) { dialog, id ->
                     dialog.dismiss()
                 }.create().show()
-        })
+        }
     }
 
     private fun closeBT() {
@@ -295,5 +309,10 @@ class MainActivityTest : AppCompatActivity() {
             e.printStackTrace()
         }
     }
+
+    private val job = Job()
+
+    override val coroutineContext: CoroutineContext
+        get() = job + Dispatchers.IO
 
 }
